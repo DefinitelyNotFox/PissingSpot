@@ -16,6 +16,18 @@ import {
 import { soundFx } from './utils/audio';
 import { getPissRank } from './utils/rank';
 import { getActiveAccount, saveAccount, loginWithGoogle } from './utils/auth';
+import { 
+  signInWithGoogle, 
+  signOutUser, 
+  subscribeToAuth, 
+  saveUserProfileToCloud 
+} from './services/authService';
+import { 
+  subscribeToSpots, 
+  addSpotToCloud, 
+  checkInSpotInCloud, 
+  addCommentToCloud 
+} from './services/spotService';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabType>('map');
@@ -36,6 +48,7 @@ export function App() {
   const [accountData, setAccountData] = useState(() => getActiveAccount());
   const [profile, setProfile] = useState<UserProfile>(() => accountData.profile);
   const [userPissedSpotIds, setUserPissedSpotIds] = useState<string[]>(() => accountData.userPissedSpotIds);
+  const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
 
   const [leaderboards, setLeaderboards] = useState(() => {
     const saved = localStorage.getItem('pissing_leaderboards');
@@ -60,20 +73,59 @@ export function App() {
     subtitle?: string;
   }>({ show: false, title: '' });
 
-  // Sync to localStorage
+  // 1. Real-time Cloud Firestore listener pro všechny spoty
+  useEffect(() => {
+    const unsubscribeSpots = subscribeToSpots((cloudSpots) => {
+      if (cloudSpots && cloudSpots.length > 0) {
+        setSpots(cloudSpots);
+      }
+    });
+    return () => unsubscribeSpots();
+  }, []);
+
+  // 2. Real-time Firebase Authentication listener
+  useEffect(() => {
+    const unsubscribeAuth = subscribeToAuth((userData) => {
+      if (userData) {
+        setFirebaseUid(userData.uid);
+        setProfile(userData.profile);
+        setUserPissedSpotIds(userData.userPissedSpotIds);
+      } else {
+        setFirebaseUid(null);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Sync to localStorage and Cloud Firestore
   useEffect(() => {
     localStorage.setItem('pissing_spots', JSON.stringify(spots));
   }, [spots]);
 
   useEffect(() => {
     saveAccount(profile, userPissedSpotIds);
+    if (firebaseUid) {
+      saveUserProfileToCloud(firebaseUid, profile, userPissedSpotIds);
+    }
     soundFx.setEnabled(profile.soundEnabled);
     if (profile.darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [profile, userPissedSpotIds]);
+  }, [profile, userPissedSpotIds, firebaseUid]);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const userData = await signInWithGoogle();
+      setFirebaseUid(userData.uid);
+      setProfile(userData.profile);
+      setUserPissedSpotIds(userData.userPissedSpotIds);
+    } catch (err) {
+      console.error('Chyba při přihlášení přes Google:', err);
+      throw err;
+    }
+  };
 
   const handleSwitchAccount = (email: string, name?: string) => {
     const nextAcc = loginWithGoogle(email, name);
@@ -82,11 +134,15 @@ export function App() {
     setUserPissedSpotIds(nextAcc.userPissedSpotIds);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+    } catch {}
     const nextAcc = loginWithGoogle('kapitan.prutok@gmail.com');
     setAccountData(nextAcc);
     setProfile(nextAcc.profile);
     setUserPissedSpotIds(nextAcc.userPissedSpotIds);
+    setFirebaseUid(null);
   };
 
   // Request GPS Poloha
@@ -110,6 +166,11 @@ export function App() {
   // Add Spot handler from PissModal
   const handleAddSpot = (newSpot: Spot) => {
     setSpots((prev) => [newSpot, ...prev]);
+
+    // Uložit do Cloud Firestore pro všechny uživatele
+    addSpotToCloud(newSpot).catch((err) => {
+      console.warn('Nepodařilo se uložit spot do Firestore:', err);
+    });
 
     const oldRank = getPissRank(profile.litersTotal).rank;
     const newLiters = profile.litersTotal + 1;
@@ -185,6 +246,9 @@ export function App() {
     setSpots((prev) =>
       prev.map((s) => (s.id === spot.id ? { ...s, reviewsCount: s.reviewsCount + 1 } : s))
     );
+
+    // Zapsat check-in do Cloud Firestore
+    checkInSpotInCloud(spot.id).catch(() => {});
 
     const oldRank = getPissRank(profile.litersTotal).rank;
     const newLiters = profile.litersTotal + 1;
@@ -273,6 +337,17 @@ export function App() {
   };
 
   const handleAddComment = (spotId: string, comment: SpotComment) => {
+    const targetSpot = spots.find((s) => s.id === spotId);
+    if (targetSpot) {
+      addCommentToCloud(
+        spotId,
+        comment,
+        targetSpot.comments || [],
+        targetSpot.rating,
+        targetSpot.reviewsCount
+      ).catch(() => {});
+    }
+
     setSpots((prev) =>
       prev.map((s) => {
         if (s.id !== spotId) return s;
@@ -338,6 +413,7 @@ export function App() {
             profile={profile}
             onUpdateProfile={(updated) => setProfile((prev) => ({ ...prev, ...updated }))}
             onSwitchAccount={handleSwitchAccount}
+            onGoogleSignIn={handleGoogleSignIn}
             onLogout={handleLogout}
             spots={spots}
             userPissedSpotIds={userPissedSpotIds}

@@ -25,6 +25,7 @@ interface ProfileScreenProps {
   profile: UserProfile;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
   onSwitchAccount?: (email: string, name?: string) => void;
+  onGoogleSignIn?: () => Promise<void>;
   onLogout?: () => void;
   spots?: Spot[];
   userPissedSpotIds?: string[];
@@ -36,6 +37,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   profile,
   onUpdateProfile,
   onSwitchAccount,
+  onGoogleSignIn,
   onLogout,
   spots = [],
   userPissedSpotIds = []
@@ -620,6 +622,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             onSwitchAccount(email, name);
           }
         }}
+        onGoogleSignIn={onGoogleSignIn}
         onLogout={onLogout}
       />
 
