@@ -15,6 +15,7 @@ interface FeedScreenProps {
   currentUser?: {
     username: string;
     avatar: string;
+    handle?: string;
   };
 }
 
@@ -55,7 +56,7 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-[var(--bg-app)] text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-24 transition-colors duration-150">
+    <div className="w-full h-full text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-24 transition-colors duration-150 relative z-10">
       
       {/* Feed Header */}
       <header className="max-w-xl mx-auto w-full pt-3 pb-4 flex items-center justify-between">

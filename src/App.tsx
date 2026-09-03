@@ -6,6 +6,7 @@ import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { PissModal } from './components/PissModal';
 import { PissSplashAnimation } from './components/PissSplashAnimation';
+import { DrippingDrops } from './components/DrippingDrops';
 import type { Spot, ScopeType, UserProfile, SpotComment } from './types/spot';
 import { 
   initialSpots, 
@@ -55,10 +56,7 @@ export function App() {
     return saved ? JSON.parse(saved) : initialLeaderboards;
   });
 
-  const [achievements] = useState(() => {
-    const saved = localStorage.getItem('pissing_achievements');
-    return saved ? JSON.parse(saved) : initialAchievements;
-  });
+  const [achievements] = useState(() => initialAchievements);
 
   // User Coordinates (Default Prague Center, updated with real GPS if permitted)
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number }>({
@@ -161,6 +159,11 @@ export function App() {
         { enableHighAccuracy: true, timeout: 5000 }
       );
     }
+  }, []);
+
+  // Preload pee sound MP3 for instant playback
+  useEffect(() => {
+    soundFx.preload();
   }, []);
 
   // Add Spot handler from PissModal
@@ -371,6 +374,8 @@ export function App() {
       
       {/* Dynamic Screen View */}
       <main className="flex-1 relative w-full h-full overflow-hidden">
+        {/* Ambient dripping drops animation – visible only outside map */}
+        {activeTab !== 'map' && <DrippingDrops />}
         {activeTab === 'map' && (
           <MapScreen
             spots={spots}
@@ -383,7 +388,7 @@ export function App() {
             onTogglePuddleFriend={handleTogglePuddleFriend}
             userPissedSpotIds={userPissedSpotIds}
             onAddComment={handleAddComment}
-            currentUser={{ username: profile.username, avatar: profile.avatar }}
+            currentUser={{ username: profile.username, avatar: profile.avatar, handle: profile.handle }}
           />
         )}
 
@@ -395,7 +400,7 @@ export function App() {
             onTogglePuddleFriend={handleTogglePuddleFriend}
             spots={spots}
             onAddComment={handleAddComment}
-            currentUser={{ username: profile.username, avatar: profile.avatar }}
+            currentUser={{ username: profile.username, avatar: profile.avatar, handle: profile.handle }}
           />
         )}
 
@@ -405,6 +410,8 @@ export function App() {
             achievements={achievements}
             puddleFriends={profile.puddleFriends}
             currentProfile={profile}
+            userPissedSpotIds={userPissedSpotIds}
+            spots={spots}
           />
         )}
 

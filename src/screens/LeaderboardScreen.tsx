@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import type { LeaderboardUser, Achievement, AchievementCategory, PuddleFriend, UserProfile } from '../types/spot';
+import type { LeaderboardUser, Achievement, AchievementCategory, PuddleFriend, UserProfile, Spot } from '../types/spot';
 import { Trophy, Lock, CheckCircle2, X } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import { getAccountsRegistry } from '../utils/auth';
+import { evaluateAchievements } from '../utils/achievements';
 
 const ACHIEVEMENT_CATEGORIES: { id: AchievementCategory; label: string; icon: string }[] = [
   { id: 'all', label: 'Všechny', icon: '⚡' },
@@ -18,6 +19,8 @@ interface LeaderboardScreenProps {
   achievements: Achievement[];
   puddleFriends?: PuddleFriend[];
   currentProfile?: UserProfile;
+  userPissedSpotIds?: string[];
+  spots?: Spot[];
 }
 
 const renderAvatar = (avatar?: string, className = "w-full h-full object-cover") => {
@@ -32,14 +35,20 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
   leaderboards: _leaderboards,
   achievements: initialAchievements,
   puddleFriends = [],
-  currentProfile
+  currentProfile,
+  userPissedSpotIds = [],
+  spots = []
 }) => {
   const [scope, setScope] = useState<'weekly' | 'total'>('weekly');
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory>('all');
 
+  const evaluatedAchievements = useMemo(() => {
+    return evaluateAchievements(initialAchievements, currentProfile, userPissedSpotIds, spots);
+  }, [initialAchievements, currentProfile, userPissedSpotIds, spots]);
+
   const filteredAchievements = useMemo(() => {
-    return initialAchievements
+    return evaluatedAchievements
       .filter((a) => selectedCategory === 'all' || a.category === selectedCategory)
       .sort((a, b) => {
         if (selectedCategory === 'all' && a.category !== b.category) {
@@ -47,7 +56,9 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
         }
         return a.tier - b.tier;
       });
-  }, [initialAchievements, selectedCategory]);
+  }, [evaluatedAchievements, selectedCategory]);
+
+  const unlockedCount = evaluatedAchievements.filter((a) => a.unlocked).length;
 
   // V žebříčcích (týdenním i celkovém) se zobrazují přátelé + ty + ostatní registrované Gmail účty
   const users: LeaderboardUser[] = useMemo(() => {
@@ -127,10 +138,8 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
   const top3 = users.find((u) => u.rank === 3);
   const restUsers = users.filter((u) => u.rank > 3);
 
-  const unlockedCount = initialAchievements.filter((a) => a.unlocked).length;
-
   return (
-    <div className="w-full h-full bg-[var(--bg-app)] text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-28 transition-colors duration-150">
+    <div className="w-full h-full text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-28 transition-colors duration-150 relative z-10">
       
       {/* Header */}
       <header className="max-w-xl mx-auto w-full pt-3 pb-3">

@@ -162,11 +162,17 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <img
-                        src={profile.avatar}
-                        alt={profile.username}
-                        className="w-10 h-10 rounded-full border border-black object-cover"
-                      />
+                      {profile.avatar && (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:') || profile.avatar.startsWith('blob:')) ? (
+                        <img
+                          src={profile.avatar}
+                          alt={profile.username}
+                          className="w-10 h-10 rounded-full border border-black object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full border border-black bg-yellow-300 flex items-center justify-center text-lg flex-shrink-0">
+                          {profile.avatar || '👑'}
+                        </div>
+                      )}
                       <div>
                         <div className="flex items-center gap-1.5">
                           <span className="font-black text-sm text-slate-950 dark:text-white">

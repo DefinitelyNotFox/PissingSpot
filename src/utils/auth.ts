@@ -91,7 +91,7 @@ export function getAccountsRegistry(): AccountsRegistry {
     }
   } catch {}
 
-  let defaultVisited: string[] = ['spot-3', 'spot-6', 'spot-7', 'spot-8'];
+  let defaultVisited: string[] = [];
   try {
     const savedVisited = localStorage.getItem('pissing_visited_spots');
     if (savedVisited) {

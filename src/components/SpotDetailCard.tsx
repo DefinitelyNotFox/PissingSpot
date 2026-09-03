@@ -16,6 +16,7 @@ interface SpotDetailCardProps {
   currentUser?: {
     username: string;
     avatar: string;
+    handle?: string;
   };
 }
 
@@ -61,11 +62,16 @@ export const SpotDetailCard: React.FC<SpotDetailCardProps> = ({
   const [activePhotoIdx, setActivePhotoIdx] = useState<number | null>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
-  const isCurrentUser = spot.author.includes('Ty') || spot.authorHandle === '@LordOfStreams';
+  const isCurrentUser = Boolean(
+    currentUser && (
+      (currentUser.handle && spot.authorHandle && spot.authorHandle.toLowerCase() === currentUser.handle.toLowerCase()) ||
+      (currentUser.username && spot.author && spot.author.toLowerCase() === currentUser.username.toLowerCase())
+    )
+  );
   const isPuddleFriend = puddleFriends.some(
     (f) => f.isFriend && (f.handle.toLowerCase() === spot.authorHandle.toLowerCase() || f.username === spot.author)
   );
-  const isPissed = spot.authorScope === 'me' || userPissedSpotIds.includes(spot.id);
+  const isPissed = isCurrentUser || userPissedSpotIds.includes(spot.id);
 
   return (
     <div className="absolute bottom-20 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 max-w-lg bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-3xl p-5 shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-6 duration-200 text-black dark:text-white">

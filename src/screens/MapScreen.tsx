@@ -20,6 +20,7 @@ interface MapScreenProps {
   currentUser?: {
     username: string;
     avatar: string;
+    handle?: string;
   };
 }
 
@@ -130,7 +131,13 @@ export const MapScreen: React.FC<MapScreenProps> = ({
     filteredSpots.forEach((spot) => {
       const emoji = CATEGORY_EMOJI[spot.category] || '⚡';
       const isSelected = selectedSpot?.id === spot.id;
-      const hasPissedHere = spot.authorScope === 'me' || userPissedSpotIds.includes(spot.id);
+      const isUserCreated = Boolean(
+        currentUser && (
+          (currentUser.handle && spot.authorHandle && spot.authorHandle.toLowerCase() === currentUser.handle.toLowerCase()) ||
+          (currentUser.username && spot.author && spot.author.toLowerCase() === currentUser.username.toLowerCase())
+        )
+      );
+      const hasPissedHere = isUserCreated || userPissedSpotIds.includes(spot.id);
 
       // Yellow urine drop SVG inlined
       const urineDropSvg = `

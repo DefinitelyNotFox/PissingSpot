@@ -121,7 +121,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   // Compute distinct countries where user has recorded a piss
   const pissedSpots = spots.filter(
-    (s) => s.authorScope === 'me' || s.author.includes('Ty') || userPissedSpotIds.includes(s.id)
+    (s) =>
+      (profile.handle && s.authorHandle && s.authorHandle.toLowerCase() === profile.handle.toLowerCase()) ||
+      userPissedSpotIds.includes(s.id)
   );
 
   const countryMap = new Map<string, PissCountry>();
@@ -130,14 +132,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     countryMap.set(c.code, c);
   });
 
-  if (countryMap.size === 0) {
-    countryMap.set('CZ', { code: 'CZ', name: 'Česko', flag: '🇨🇿' });
-  }
-
   const pissedCountries = Array.from(countryMap.values());
 
   return (
-    <div className="w-full h-full bg-[var(--bg-app)] text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-28 transition-colors duration-150">
+    <div className="w-full h-full text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-28 transition-colors duration-150 relative z-10">
       
       <div className="max-w-xl mx-auto w-full space-y-4 pt-2">
 
@@ -153,10 +151,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl sm:rounded-3xl bg-[#facc15] text-black font-black text-3xl flex items-center justify-center border-2 border-black shadow-md cursor-pointer hover:scale-105 active:scale-95 transition overflow-hidden relative group flex-shrink-0"
                 title="Změnit profilový obrázek"
               >
-                {editAvatar.startsWith('data:image') ? (
+                {profile.avatar && (profile.avatar.startsWith('data:image') || profile.avatar.startsWith('http') || profile.avatar.startsWith('blob:')) ? (
                   <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  profile.avatar
+                  profile.avatar || '👑'
                 )}
                 <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition">
                   ✏️
@@ -316,8 +314,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-400">
                 <Clock className="w-3.5 h-3.5 text-black dark:text-cyan-400" /> Prochcané minuty
               </div>
-              <div className="text-2xl font-black font-mono text-black dark:text-cyan-400">
-                {profile.timeTotalMinutes ?? 522} min
+              <div className="text-xl font-black font-mono text-black dark:text-amber-400">
+                {profile.timeTotalMinutes ?? 0} min
               </div>
             </div>
 
@@ -327,7 +325,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <Mountain className="w-3.5 h-3.5 text-black dark:text-emerald-400" /> Vertikální dostřel
               </div>
               <div className="text-base font-black font-mono text-black dark:text-emerald-400">
-                {profile.lowestAltitude}m ➔ {profile.highestAltitude}m
+                {profile.spotsCount > 0 ? `${profile.lowestAltitude}m ➔ ${profile.highestAltitude}m` : '0 m'}
               </div>
             </div>
 
@@ -344,20 +342,26 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   {pissedCountries.length === 1 ? 'stát' : (pissedCountries.length >= 2 && pissedCountries.length <= 4) ? 'státy' : 'států'}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 pt-1.5 overflow-x-auto custom-scroll pb-0.5">
-                {pissedCountries.map((c) => (
-                  <div 
-                    key={c.code} 
-                    title={c.name} 
-                    className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-black/20 dark:border-slate-700 shadow-2xs hover:scale-105 transition transform cursor-pointer flex-shrink-0"
-                  >
-                    <CountryFlag code={c.code} name={c.name} size="md" />
-                    <span className="text-[11px] font-black text-black dark:text-white leading-none">
-                      {c.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {pissedCountries.length > 0 ? (
+                <div className="flex items-center gap-1.5 pt-1.5 overflow-x-auto custom-scroll pb-0.5">
+                  {pissedCountries.map((c) => (
+                    <div 
+                      key={c.code} 
+                      title={c.name} 
+                      className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-black/20 dark:border-slate-700 shadow-2xs hover:scale-105 transition transform cursor-pointer flex-shrink-0"
+                    >
+                      <CountryFlag code={c.code} name={c.name} size="md" />
+                      <span className="text-[11px] font-black text-black dark:text-white leading-none">
+                        {c.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium italic pt-1">
+                  Zatím žádný zářez v mapě světa
+                </p>
+              )}
             </div>
 
           </div>
