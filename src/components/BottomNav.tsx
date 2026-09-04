@@ -15,7 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   hasUnreadFeed = true
 }) => {
   return (
-    <nav className="h-16 bg-[var(--bg-app)] border-t border-black dark:border-slate-800 px-6 sm:px-12 flex items-center justify-around z-40 relative transition-colors duration-200">
+    <nav className="bg-[var(--bg-app)] border-t border-black dark:border-slate-800 px-6 sm:px-12 flex items-center justify-around z-40 relative transition-colors duration-200" style={{ height: 'calc(4rem + env(safe-area-inset-bottom, 0px))', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       
       {/* 1. MAP */}
       <button

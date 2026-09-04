@@ -48,6 +48,10 @@ body {
   -webkit-user-select: none;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: background-color 0.15s ease, color 0.15s ease;
+  /* Safe area support for notched / gestured devices */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* Custom Scrollbar */
