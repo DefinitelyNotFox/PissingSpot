@@ -28,33 +28,27 @@ const renderAvatar = (avatar?: string) => {
   return <span>{avatar}</span>;
 };
 
+const formatPostDateTime = (timeStr: string) => {
+  if (!timeStr) return '';
+  if (timeStr === 'Právě teď') {
+    const d = new Date();
+    return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+  if (timeStr === 'Před 5 minutami') return '4. 9. 2026 16:25';
+  if (timeStr === 'Před 45 minutami') return '4. 9. 2026 15:45';
+  if (timeStr === 'Před 2 hodinami') return '4. 9. 2026 14:30';
+  if (timeStr.startsWith('Před ')) return '4. 9. 2026 15:30';
+  return timeStr;
+};
+
 export const FeedScreen: React.FC<FeedScreenProps> = ({
-  posts: initialPosts,
+  posts,
   onSelectSpotOnMap,
-  puddleFriends = [],
-  onTogglePuddleFriend,
   spots,
   onAddComment,
   currentUser
 }) => {
-  const [posts, setPosts] = useState<FeedPost[]>(initialPosts);
   const [activeCommentSpot, setActiveCommentSpot] = useState<Spot | null>(null);
-
-  const handleReaction = (postId: string, reactionType: keyof FeedPost['reactions']) => {
-    soundFx.playDroplet();
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p;
-        const currentReactions = { ...p.reactions };
-        currentReactions[reactionType] = (currentReactions[reactionType] || 0) + 1;
-        return {
-          ...p,
-          reactions: currentReactions,
-          userReaction: reactionType
-        };
-      })
-    );
-  };
 
   return (
     <div className="w-full h-full text-black dark:text-white flex flex-col overflow-y-auto custom-scroll p-4 pb-24 transition-colors duration-150 relative z-10">
@@ -83,11 +77,6 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
               ? [post.imageUrl] 
               : [];
 
-          const isCurrentUser = post.author.includes('Ty') || post.authorHandle === '@LordOfStreams';
-          const isFriend = puddleFriends.some(
-            (f) => f.isFriend && (f.handle.toLowerCase() === post.authorHandle.toLowerCase() || f.username === post.author)
-          );
-
           return (
             <article
               key={post.id}
@@ -102,26 +91,9 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-black text-sm text-black dark:text-white">{post.author}</span>
-                      {!isCurrentUser && (
-                        <button
-                          type="button"
-                          onClick={() => onTogglePuddleFriend?.({
-                            username: post.author,
-                            handle: post.authorHandle,
-                            avatar: post.authorAvatar
-                          })}
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full border border-black transition active:scale-95 ${
-                            isFriend
-                              ? 'bg-amber-300 text-black hover:bg-amber-400'
-                              : 'bg-[#facc15] hover:bg-yellow-400 text-black'
-                          }`}
-                        >
-                          {isFriend ? '✓ V louži' : '+ Do louže'}
-                        </button>
-                      )}
                     </div>
                     <div className="text-[11px] text-slate-700 dark:text-slate-400 flex items-center gap-1 mt-0.5 font-bold">
-                      <span>{post.timeAgo}</span>
+                      <span>{formatPostDateTime(post.timeAgo)}</span>
                       {post.distance && <span>• 📍 {post.distance}</span>}
                     </div>
                   </div>
@@ -170,62 +142,8 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
                 )}
               </div>
 
-              {/* Reactions Bar */}
-              <div className="flex items-center justify-between pt-2 text-xs">
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => handleReaction(post.id, 'paper')}
-                    className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-black transition ${
-                      post.userReaction === 'paper'
-                        ? 'bg-[#facc15] text-black font-black'
-                        : 'bg-slate-50 dark:bg-[#030712] text-black dark:text-slate-200 hover:bg-slate-100'
-                    }`}
-                    title="Podej toaletní papír"
-                  >
-                    <span>🧻</span>
-                    <span className="font-mono text-[11px] font-black">{post.reactions.paper}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleReaction(post.id, 'target')}
-                    className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-black transition ${
-                      post.userReaction === 'target'
-                        ? 'bg-[#facc15] text-black font-black'
-                        : 'bg-slate-50 dark:bg-[#030712] text-black dark:text-slate-200 hover:bg-slate-100'
-                    }`}
-                    title="Čistý zásah terče"
-                  >
-                    <span>🎯</span>
-                    <span className="font-mono text-[11px] font-black">{post.reactions.target}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleReaction(post.id, 'respect')}
-                    className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-black transition ${
-                      post.userReaction === 'respect'
-                        ? 'bg-[#facc15] text-black font-black'
-                        : 'bg-slate-50 dark:bg-[#030712] text-black dark:text-slate-200 hover:bg-slate-100'
-                    }`}
-                    title="Respekt za odvahu"
-                  >
-                    <span>🫡</span>
-                    <span className="font-mono text-[11px] font-black">{post.reactions.respect}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleReaction(post.id, 'skunk')}
-                    className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-black transition ${
-                      post.userReaction === 'skunk'
-                        ? 'bg-[#facc15] text-black font-black'
-                        : 'bg-slate-50 dark:bg-[#030712] text-black dark:text-slate-200 hover:bg-slate-100'
-                    }`}
-                    title="Cítím to až sem"
-                  >
-                    <span>🦨</span>
-                    <span className="font-mono text-[11px] font-black">{post.reactions.skunk}</span>
-                  </button>
-                </div>
-
+              {/* Card Footer: Comments Button */}
+              <div className="flex items-center justify-end pt-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -248,7 +166,7 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
                     } as Spot;
                     setActiveCommentSpot(targetSpot);
                   }}
-                  className="p-2 bg-[#facc15] hover:bg-yellow-400 text-black border border-black rounded-xl flex items-center justify-center transition shadow-2xs active:scale-95 ml-auto"
+                  className="p-2 bg-[#facc15] hover:bg-yellow-400 text-black border border-black rounded-xl flex items-center justify-center transition shadow-2xs active:scale-95"
                   title="Komentáře a hodnocení"
                 >
                   <MessageSquare className="w-3.5 h-3.5 fill-current" />

@@ -226,13 +226,15 @@ export function App() {
     });
 
     // Also add an entry to Feed
+    const now = new Date();
+    const formattedDateTime = `${now.getDate()}. ${now.getMonth() + 1}. ${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const newFeedPost = {
       id: `feed-${Date.now()}`,
       spotId: newSpot.id,
       author: profile.username,
       authorHandle: profile.handle,
       authorAvatar: profile.avatar,
-      timeAgo: 'Právě teď',
+      timeAgo: formattedDateTime,
       spotTitle: newSpot.title,
       spotCategory: newSpot.category,
       rating: Math.round(newSpot.rating),
@@ -276,13 +278,15 @@ export function App() {
     });
 
     // Also add live check-in to shared feed
+    const now = new Date();
+    const formattedDateTime = `${now.getDate()}. ${now.getMonth() + 1}. ${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const checkInFeedPost = {
       id: `feed-${Date.now()}`,
       spotId: spot.id,
       author: profile.username,
       authorHandle: profile.handle,
       authorAvatar: profile.avatar,
-      timeAgo: 'Právě teď',
+      timeAgo: formattedDateTime,
       spotTitle: spot.title,
       spotCategory: spot.category,
       rating: Math.round(spot.rating),
