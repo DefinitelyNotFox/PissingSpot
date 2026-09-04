@@ -20,7 +20,7 @@ const RATING_DESCRIPTIONS: Record<number, string> = {
   2: '2/5 • Průměr / Nic moc 😐',
   3: '3/5 • Dobrý standard 💧',
   4: '4/5 • Skvělý proud & krytí 🎯',
-  5: '5/5 • Božský revír & Legenda! 👑'
+  5: '5/5 • Božský spot & Legenda! 👑'
 };
 
 const DEFAULT_COMMENTS_BY_CATEGORY: Record<string, SpotComment[]> = {
@@ -40,7 +40,7 @@ const DEFAULT_COMMENTS_BY_CATEGORY: Record<string, SpotComment[]> = {
       authorHandle: '@petr_stromovka',
       avatar: '🌲',
       rating: 5,
-      text: 'Naprostá pecka. Revír označen, doporučuji za soumraku.',
+      text: 'Naprostá pecka. Spot označen, doporučuji za soumraku.',
       createdAt: 'Před 5 dny'
     }
   ],
@@ -122,14 +122,14 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
           authorHandle: '@zved_pruzkumnik',
           avatar: '⚡',
           rating: Math.round(spot.rating),
-          text: spot.epiphany || 'Revír zkontrolován a zalit. Podmínky vyhovující.',
+          text: spot.epiphany || 'Spot zkontrolován a zalit. Podmínky vyhovující.',
           createdAt: 'Nedávno'
         }
       ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     soundFx.playFlush();
@@ -140,7 +140,7 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
       authorHandle: '@' + currentUser.username.toLowerCase().replace(/\s+/g, '_'),
       avatar: currentUser.avatar,
       rating,
-      text: commentText.trim(),
+      text: commentText.trim() || 'Zalito a ohodnoceno 💦',
       createdAt: 'Právě teď'
     };
 
@@ -190,7 +190,7 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
           <div className="bg-[#facc15]/15 border-2 border-black dark:border-yellow-400/40 rounded-2xl p-3.5 flex items-center justify-between shadow-xs">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-yellow-400">
-                Průměrné hodnocení revíru
+                Průměrné hodnocení spotu
               </span>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-2xl font-mono font-black text-black dark:text-yellow-400">
@@ -201,7 +201,7 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
             </div>
             <div className="text-right font-mono">
               <span className="text-xs font-black text-slate-800 dark:text-slate-300">
-                {spot.reviewsCount} zářezů
+                {spot.ratings ? spot.ratings.length : (spot.comments && spot.comments.length > 0 ? spot.comments.length + 1 : 1)} hodnocení
               </span>
               <p className="text-[10px] text-slate-500 font-medium">od kropičů z louže</p>
             </div>
@@ -209,17 +209,9 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
 
           {/* Add Review Form */}
           <form onSubmit={handleSubmit} className="bg-slate-50 dark:bg-[#1f2937]/50 border-2 border-black dark:border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-black dark:text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Tvoje hodnocení spotu:
-              </span>
-              <span className="text-[11px] font-mono font-black text-amber-600 dark:text-yellow-400">
-                {activeRating} / 5
-              </span>
-            </div>
 
             {/* Clickable Urine Drops Selector */}
-            <div className="flex items-center justify-between bg-white dark:bg-[#111827] border border-black dark:border-slate-800 p-2.5 rounded-xl">
+            <div className="flex items-center justify-center bg-white dark:bg-[#111827] border border-black dark:border-slate-800 p-2.5 rounded-xl">
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((val) => (
                   <button
@@ -241,9 +233,6 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
                   </button>
                 ))}
               </div>
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 ml-2 truncate text-right">
-                {RATING_DESCRIPTIONS[activeRating]}
-              </span>
             </div>
 
             {/* Comment Textarea */}
@@ -260,15 +249,11 @@ export const SpotCommentsModal: React.FC<SpotCommentsModalProps> = ({
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting || !commentText.trim()}
-              className={`w-full py-2.5 px-4 rounded-xl border-2 border-black font-black text-xs flex items-center justify-center gap-2 transition shadow-sm ${
-                commentText.trim()
-                  ? 'bg-[#facc15] hover:bg-yellow-400 text-black active:scale-95 cursor-pointer'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-500 border-black/30 cursor-not-allowed'
-              }`}
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 rounded-xl border-2 border-black font-black text-xs flex items-center justify-center gap-2 transition shadow-sm bg-[#facc15] hover:bg-yellow-400 text-black active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>PŘIDAT KOMENTÁŘ & HODNOCENÍ</span>
+              <span>{commentText.trim() ? 'PŘIDAT KOMENTÁŘ & HODNOCENÍ' : 'ODESLAT HODNOCENÍ'}</span>
             </button>
           </form>
 

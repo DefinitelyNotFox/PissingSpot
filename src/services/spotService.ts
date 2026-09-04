@@ -72,20 +72,19 @@ export async function addCommentToCloud(
   spotId: string, 
   newComment: SpotComment, 
   currentComments: SpotComment[],
-  currentRating: number,
+  calculatedRating: number,
+  updatedRatings: number[],
   reviewsCount: number
 ): Promise<void> {
   try {
     const spotRef = doc(db, SPOTS_COLLECTION, spotId);
     const updatedComments = [newComment, ...currentComments];
-    const newRating = Number(
-      ((currentRating * reviewsCount + newComment.rating) / (reviewsCount + 1)).toFixed(1)
-    );
 
     await updateDoc(spotRef, {
       comments: updatedComments,
       reviewsCount: reviewsCount + 1,
-      rating: newRating
+      rating: calculatedRating,
+      ratings: updatedRatings
     });
   } catch (error) {
     console.error('Chyba při ukládání komentáře do Firestore:', error);

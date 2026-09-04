@@ -349,14 +349,37 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             })()}
 
             {/* Stat 3 - Vertikální dostřel */}
-            <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
-              <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-400">
-                <Mountain className="w-3.5 h-3.5 text-black dark:text-emerald-400" /> Vertikální dostřel
-              </div>
-              <div className="text-base font-black font-mono text-black dark:text-emerald-400">
-                {profile.spotsCount > 0 ? `${profile.lowestAltitude}m ➔ ${profile.highestAltitude}m` : '0 m'}
-              </div>
-            </div>
+            {(() => {
+              const spotsWithAlt = pissedSpots.filter((s) => s.altitude != null && s.altitude > 0);
+              const hasData = spotsWithAlt.length > 0;
+              const minAlt = hasData ? Math.min(...spotsWithAlt.map((s) => s.altitude!)) : 0;
+              const maxAlt = hasData ? Math.max(...spotsWithAlt.map((s) => s.altitude!)) : 0;
+              const spread = maxAlt - minAlt;
+
+              return (
+                <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-400">
+                    <Mountain className="w-3.5 h-3.5 text-black dark:text-emerald-400" /> Vertikální dostřel
+                  </div>
+                  {hasData ? (
+                    <>
+                      <div className="text-2xl font-black font-mono text-black dark:text-emerald-400">
+                        {spread} m
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-snug flex items-center gap-1">
+                        <span>⬇ {minAlt} m</span>
+                        <span className="text-slate-400 dark:text-slate-600">→</span>
+                        <span>⬆ {maxAlt} m n.m.</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-base font-black font-mono text-slate-400">
+                      — m
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Stat 4 - Pochcané státy */}
             <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
@@ -395,55 +418,45 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* NASTAVENÍ */}
         <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-3xl p-2 shadow-sm divide-y divide-black/10 dark:divide-white/10 text-xs text-black dark:text-white">
           
-          {/* THEME TOGGLE: SVĚTLÝ ŽLUTÝ VS NOČNÍ TMAVÝ */}
-          <div className="p-3.5 flex items-center justify-between gap-3">
+          {/* VZHLED */}
+          <div className="p-3 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {profile.darkMode ? (
-                <Moon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                <Moon className="w-4.5 h-4.5 text-yellow-400 flex-shrink-0" />
               ) : (
-                <Sun className="w-5 h-5 text-black flex-shrink-0" />
+                <Sun className="w-4.5 h-4.5 text-black flex-shrink-0" />
               )}
-              <div>
-                <div className="font-black text-black dark:text-white">
-                  {profile.darkMode ? 'Noční režim (Tmavý)' : 'Normální režim (Zlatavě žlutý)'}
-                </div>
-                <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                  {profile.darkMode ? 'Přepnout na denní zlatavě žlutou' : 'Přepnout na noční tmavý vzhled'}
-                </div>
-              </div>
+              <span className="font-black text-sm text-black dark:text-white">Vzhled</span>
             </div>
             <button
               onClick={toggleDarkMode}
-              className="px-3.5 py-1.5 rounded-xl font-black bg-[#facc15] hover:bg-yellow-400 text-black border border-black shadow-sm transition transform active:scale-95 flex items-center gap-1.5"
+              className="w-11 h-6 rounded-full border border-black dark:border-slate-600 flex items-center transition-colors duration-200 px-0.5 relative"
+              style={{ background: profile.darkMode ? '#facc15' : '#1e293b' }}
+              aria-label="Přepnout vzhled"
             >
-              {profile.darkMode ? (
-                <><span>☀️</span><span>Zlatý denní</span></>
-              ) : (
-                <><span>🌙</span><span>Noční tmavý</span></>
-              )}
+              <div
+                className="w-5 h-5 rounded-full bg-white border border-black/30 shadow-sm transition-transform duration-200"
+                style={{ transform: profile.darkMode ? 'translateX(100%)' : 'translateX(0)' }}
+              />
             </button>
           </div>
 
-          {/* PLOŠNÉ ZVUKY APLIKACE */}
-          <div className="p-3.5 flex items-center justify-between gap-3">
+          {/* ZVUK */}
+          <div className="p-3 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Volume2 className="w-5 h-5 text-black dark:text-yellow-400 flex-shrink-0" />
-              <div>
-                <div className="font-black text-black dark:text-white">Zvuky aplikace (plošně)</div>
-                <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                  Zapnout nebo vypnout veškeré zvuky v celé aplikaci
-                </div>
-              </div>
+              <Volume2 className="w-4.5 h-4.5 text-black dark:text-yellow-400 flex-shrink-0" />
+              <span className="font-black text-sm text-black dark:text-white">Zvuk</span>
             </div>
             <button
               onClick={toggleSound}
-              className={`px-3.5 py-1.5 rounded-xl font-black border border-black transition ${
-                soundEnabled
-                  ? 'bg-[#facc15] text-black'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-              }`}
+              className="w-11 h-6 rounded-full border border-black dark:border-slate-600 flex items-center transition-colors duration-200 px-0.5 relative"
+              style={{ background: soundEnabled ? '#facc15' : '#1e293b' }}
+              aria-label="Přepnout zvuk"
             >
-              {soundEnabled ? 'Zapnuto 🔊' : 'Vypnuto 🔇'}
+              <div
+                className="w-5 h-5 rounded-full bg-white border border-black/30 shadow-sm transition-transform duration-200"
+                style={{ transform: soundEnabled ? 'translateX(100%)' : 'translateX(0)' }}
+              />
             </button>
           </div>
 

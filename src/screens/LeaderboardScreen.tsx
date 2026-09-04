@@ -118,7 +118,7 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
           username: f.username,
           handle: f.handle,
           avatar: f.avatar,
-          title: f.title || 'Parťák v revíru',
+          title: f.title || 'Parťák ve spotu',
           liters,
           spotsCount,
           isCurrentUser: false

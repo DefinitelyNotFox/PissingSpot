@@ -47,7 +47,9 @@ export interface Spot {
   author: string;
   authorHandle: string;
   authorScope: 'me' | 'friends' | 'world';
-  rating: number; // 1.0 - 5.0
+  rating: number; // 1.0 - 5.0 (průměr všech hodnocení)
+  initialRating?: number;
+  ratings?: number[];
   reviewsCount: number;
   metrics: SpotMetrics;
   ground: GroundType;

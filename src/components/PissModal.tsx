@@ -241,7 +241,10 @@ export const PissModal: React.FC<PissModalProps> = ({
       authorHandle: currentUser?.handle || '@LordOfStreams',
       authorScope: 'me',
       rating: avgRating,
+      initialRating: avgRating,
+      ratings: [avgRating],
       reviewsCount: 1,
+      comments: [],
       metrics: {
         view: viewRating,
         privacy: privacyRating,

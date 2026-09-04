@@ -4,6 +4,7 @@ import { Flame, MapPin, MessageSquare } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import { UrineRating } from '../components/UrineDrop';
 import { SpotCommentsModal } from '../components/SpotCommentsModal';
+import { getSpotRatings, calcAverageRating } from '../utils/rating';
 
 interface FeedScreenProps {
   posts: FeedPost[];
@@ -247,11 +248,10 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
                     } as Spot;
                     setActiveCommentSpot(targetSpot);
                   }}
-                  className="px-2.5 py-1.5 bg-[#facc15] hover:bg-yellow-400 text-black border border-black rounded-xl text-xs flex items-center gap-1.5 font-black transition shadow-2xs active:scale-95 ml-auto"
+                  className="p-2 bg-[#facc15] hover:bg-yellow-400 text-black border border-black rounded-xl flex items-center justify-center transition shadow-2xs active:scale-95 ml-auto"
                   title="Komentáře a hodnocení"
                 >
                   <MessageSquare className="w-3.5 h-3.5 fill-current" />
-                  <span>Komentáře</span>
                 </button>
               </div>
 
@@ -271,13 +271,14 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({
             setActiveCommentSpot((prev) => {
               if (!prev || prev.id !== spotId) return prev;
               const newComments = [comment, ...(prev.comments || [])];
-              const newRating = Number(
-                ((prev.rating * prev.reviewsCount + comment.rating) / (prev.reviewsCount + 1)).toFixed(1)
-              );
+              const prevRatings = getSpotRatings(prev);
+              const updatedRatings = [...prevRatings, comment.rating];
+              const calculatedRating = calcAverageRating(updatedRatings);
               return {
                 ...prev,
                 reviewsCount: prev.reviewsCount + 1,
-                rating: newRating,
+                rating: calculatedRating,
+                ratings: updatedRatings,
                 comments: newComments
               };
             });

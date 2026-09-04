@@ -11,6 +11,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@honza_orel',
     authorScope: 'friends',
     rating: 4.9,
+    initialRating: 4.9,
+    ratings: [4.9],
     reviewsCount: 142,
     metrics: {
       view: 5,
@@ -36,6 +38,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@petr_survival',
     authorScope: 'world',
     rating: 1.8,
+    initialRating: 1.8,
+    ratings: [1.8],
     reviewsCount: 89,
     metrics: {
       view: 1,
@@ -62,6 +66,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@petr_stromovka',
     authorScope: 'friends',
     rating: 4.8,
+    initialRating: 4.8,
+    ratings: [4.8],
     reviewsCount: 37,
     metrics: {
       view: 4,
@@ -87,6 +93,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@eliska_k',
     authorScope: 'friends',
     rating: 4.3,
+    initialRating: 4.3,
+    ratings: [4.3],
     reviewsCount: 215,
     metrics: {
       view: 2,
@@ -112,6 +120,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@michal_ninja',
     authorScope: 'world',
     rating: 4.7,
+    initialRating: 4.7,
+    ratings: [4.7],
     reviewsCount: 74,
     metrics: {
       view: 5,
@@ -137,6 +147,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@lesni_skaut',
     authorScope: 'world',
     rating: 4.6,
+    initialRating: 4.6,
+    ratings: [4.6],
     reviewsCount: 52,
     metrics: {
       view: 5,
@@ -162,6 +174,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@alps_king',
     authorScope: 'world',
     rating: 5.0,
+    initialRating: 5.0,
+    ratings: [5.0],
     reviewsCount: 88,
     metrics: {
       view: 5,
@@ -187,6 +201,8 @@ export const initialSpots: Spot[] = [
     authorHandle: '@tatry_kamzik',
     authorScope: 'world',
     rating: 4.9,
+    initialRating: 4.9,
+    ratings: [4.9],
     reviewsCount: 165,
     metrics: {
       view: 5,
@@ -258,7 +274,7 @@ export const initialAchievements: Achievement[] = [
     id: 'ach-nat-1',
     title: 'Zahradní trpaslík',
     icon: '🍄',
-    description: 'Zalij 1 přírodní nebo lesní revír.',
+    description: 'Zalij 1 přírodní nebo lesní spot.',
     flavorQuote: 'První ranní kapička v trávě. Příroda děkuje za dusíkaté hnojivo.',
     unlocked: false,
     category: 'nature',
@@ -366,7 +382,7 @@ export const initialAchievements: Achievement[] = [
     tierName: 'Level IV - Parní válec',
     progress: 0,
     maxProgress: 1,
-    reward: 'Titul: Niagara Revíru'
+    reward: 'Titul: Niagara Spotu'
   },
 
   // --- KATEGORIE 3: BALISTICKÝ INŽENÝR ---
@@ -374,7 +390,7 @@ export const initialAchievements: Achievement[] = [
     id: 'ach-ball-1',
     title: 'Tichý ninja',
     icon: '🥷',
-    description: 'Dosáhni v revíru 0% odrazu (splashback).',
+    description: 'Dosáhni ve spotu 0% odrazu (splashback).',
     flavorQuote: 'Fyzika úhlu dopadu zvládnutá na jedničku. Kalhoty i boty zůstaly suché.',
     unlocked: false,
     category: 'ballistics',
@@ -446,7 +462,7 @@ export const initialAchievements: Achievement[] = [
     id: 'ach-world-2',
     title: 'Přeshraniční sabotér',
     icon: '🛂',
-    description: 'Označ revír v zahraničí (Rakousko, Slovensko nebo dál).',
+    description: 'Označ spot v zahraničí (Rakousko, Slovensko nebo dál).',
     flavorQuote: 'Hranice padly, proud nezná celní kontrolu. Mezinárodní expanze započata.',
     unlocked: false,
     category: 'world',
@@ -533,7 +549,7 @@ export const initialAchievements: Achievement[] = [
     title: 'Nejvyšší Proudmistr louže',
     icon: '👑',
     description: 'Obsaď 1. místo ve Zlaté lize mezi všemi bratry a sestrami.',
-    flavorQuote: 'Koruna patří tobě. Bratři i sestry poklekají před největším proudem revíru.',
+    flavorQuote: 'Koruna patří tobě. Bratři i sestry poklekají před největším proudem spotu.',
     unlocked: false,
     category: 'social',
     tier: 4,

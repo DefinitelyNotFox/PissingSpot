@@ -16,6 +16,7 @@ import {
 } from './data/initialData';
 import { soundFx } from './utils/audio';
 import { getPissRank } from './utils/rank';
+import { getSpotRatings, calcAverageRating } from './utils/rating';
 import { getActiveAccount, saveAccount, loginWithGoogle } from './utils/auth';
 import { 
   signInWithGoogle, 
@@ -218,7 +219,7 @@ export function App() {
     soundFx.playFlush();
     setSplashAnimation({
       show: true,
-      title: leveledUp ? '🎉 LEVEL UP!' : 'REVÍR OZNAČEN! 💦',
+      title: leveledUp ? '🎉 LEVEL UP!' : 'SPOT OZNAČEN! 💦',
       subtitle: leveledUp
         ? `${newRankInfo.formattedRank} dosažen! (+1 L)`
         : `${newSpot.title} • +1 L do levelu`
@@ -235,7 +236,7 @@ export function App() {
       spotTitle: newSpot.title,
       spotCategory: newSpot.category,
       rating: Math.round(newSpot.rating),
-      epiphany: newSpot.epiphany || 'Nový revír úspěšně označen!',
+      epiphany: newSpot.epiphany || 'Nový spot úspěšně označen!',
       distance: 'Zde',
       isLive: true,
       reactions: { paper: 0, skunk: 0, target: 1, respect: 1 }
@@ -268,7 +269,7 @@ export function App() {
     setUserPissedSpotIds((prev) => (prev.includes(spot.id) ? prev : [spot.id, ...prev]));
     setSplashAnimation({
       show: true,
-      title: leveledUp ? '🎉 LEVEL UP!' : 'REVÍR ZALIT! 💦',
+      title: leveledUp ? '🎉 LEVEL UP!' : 'SPOT ZALIT! 💦',
       subtitle: leveledUp
         ? `${newRankInfo.formattedRank} dosažen! (+1 L)`
         : `${spot.title} • +1 L do levelu`
@@ -285,7 +286,7 @@ export function App() {
       spotTitle: spot.title,
       spotCategory: spot.category,
       rating: Math.round(spot.rating),
-      epiphany: `${profile.username} právě zalil tento revír! 💦`,
+      epiphany: `${profile.username} právě zalil tento spot! 💦`,
       distance: 'Zde',
       isLive: true,
       reactions: { paper: 0, skunk: 0, target: 1, respect: 1 }
@@ -322,7 +323,7 @@ export function App() {
           username: authorData.username,
           handle: authorData.handle,
           avatar: authorData.avatar || '👤',
-          title: 'Parťák v revíru',
+          title: 'Parťák ve spotu',
           distance: 'V okolí',
           spotsCount: 1,
           isFriend: true
@@ -341,12 +342,17 @@ export function App() {
 
   const handleAddComment = (spotId: string, comment: SpotComment) => {
     const targetSpot = spots.find((s) => s.id === spotId);
+    const existingRatings = targetSpot ? getSpotRatings(targetSpot) : [];
+    const updatedRatings = [...existingRatings, comment.rating];
+    const calculatedRating = calcAverageRating(updatedRatings);
+
     if (targetSpot) {
       addCommentToCloud(
         spotId,
         comment,
         targetSpot.comments || [],
-        targetSpot.rating,
+        calculatedRating,
+        updatedRatings,
         targetSpot.reviewsCount
       ).catch(() => {});
     }
@@ -356,13 +362,14 @@ export function App() {
         if (s.id !== spotId) return s;
         const currentComments = s.comments || [];
         const newComments = [comment, ...currentComments];
-        const newRating = Number(
-          ((s.rating * s.reviewsCount + comment.rating) / (s.reviewsCount + 1)).toFixed(1)
-        );
+        const prevRatings = getSpotRatings(s);
+        const nextRatings = [...prevRatings, comment.rating];
+        const newAvgRating = calcAverageRating(nextRatings);
         return {
           ...s,
           reviewsCount: s.reviewsCount + 1,
-          rating: newRating,
+          rating: newAvgRating,
+          ratings: nextRatings,
           comments: newComments
         };
       })

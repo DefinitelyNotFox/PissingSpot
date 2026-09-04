@@ -46,9 +46,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         }`}
       >
         <Flame className="w-6 h-6 stroke-[2.5]" />
-        {hasUnreadFeed && activeTab !== 'feed' && (
-          <span className="w-2.5 h-2.5 rounded-full bg-black dark:bg-yellow-400 absolute top-2 right-2 border border-[var(--bg-app)] animate-pulse" />
-        )}
         {activeTab === 'feed' && (
           <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-black dark:bg-yellow-400" />
         )}

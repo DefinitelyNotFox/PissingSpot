@@ -5,6 +5,7 @@ import { SpotDetailCard } from '../components/SpotDetailCard';
 import { NearbySpotsModal } from '../components/NearbySpotsModal';
 import { User, Users, Globe, Zap, Search } from 'lucide-react';
 import { soundFx } from '../utils/audio';
+import { getSpotRatings, calcAverageRating } from '../utils/rating';
 
 interface MapScreenProps {
   spots: Spot[];
@@ -169,7 +170,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             transform: scale(${pinScale});
           ">
             ${emoji}
-            ${hasPissedHere ? '<span style="position: absolute; top: -3px; right: -3px; font-size: 10px; line-height: 1;" title="Zde jsi už zalil revír">⚡</span>' : ''}
+            ${hasPissedHere ? '<span style="position: absolute; top: -3px; right: -3px; font-size: 10px; line-height: 1;" title="Zde jsi už zalil spot">⚡</span>' : ''}
           </div>
           <div style="
             background: #000000;
@@ -314,13 +315,14 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             setSelectedSpot((prev) => {
               if (!prev || prev.id !== spotId) return prev;
               const newComments = [comment, ...(prev.comments || [])];
-              const newRating = Number(
-                ((prev.rating * prev.reviewsCount + comment.rating) / (prev.reviewsCount + 1)).toFixed(1)
-              );
+              const prevRatings = getSpotRatings(prev);
+              const updatedRatings = [...prevRatings, comment.rating];
+              const calculatedRating = calcAverageRating(updatedRatings);
               return {
                 ...prev,
                 reviewsCount: prev.reviewsCount + 1,
-                rating: newRating,
+                rating: calculatedRating,
+                ratings: updatedRatings,
                 comments: newComments
               };
             });
