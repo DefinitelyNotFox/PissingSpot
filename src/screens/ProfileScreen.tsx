@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { UserProfile, Spot } from '../types/spot';
 import { 
-  Clock, 
   Mountain, 
   Volume2, 
   Moon,
@@ -309,15 +308,45 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </p>
             </div>
 
-            {/* Stat 2 - Prochcané minuty */}
-            <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
-              <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-400">
-                <Clock className="w-3.5 h-3.5 text-black dark:text-cyan-400" /> Prochcané minuty
-              </div>
-              <div className="text-xl font-black font-mono text-black dark:text-amber-400">
-                {profile.timeTotalMinutes ?? 0} min
-              </div>
-            </div>
+            {/* Stat 2 - Frekvence ventilu (průměrná kadence) */}
+            {(() => {
+              const activeDays = profile.calendarData.filter((d) => d.count > 0).length || 1;
+              const cadence = profile.litersTotal / activeDays;
+              const cadenceDisplay = cadence % 1 === 0 ? cadence.toString() : cadence.toFixed(1);
+              
+              let cadenceTitle: string;
+              let cadenceEmoji: string;
+              if (cadence < 2) {
+                cadenceTitle = 'Velbloud';
+                cadenceEmoji = '🐪';
+              } else if (cadence < 5) {
+                cadenceTitle = 'Normálka';
+                cadenceEmoji = '🚰';
+              } else if (cadence < 8) {
+                cadenceTitle = 'Náčelník hasičského sboru';
+                cadenceEmoji = '🚒';
+              } else if (cadence < 12) {
+                cadenceTitle = 'Hospodský průtokáč';
+                cadenceEmoji = '🍺';
+              } else {
+                cadenceTitle = 'Nekontrolovatelný hydrant';
+                cadenceEmoji = '🚿';
+              }
+
+              return (
+                <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-400">
+                    <span>{cadenceEmoji}</span> Frekvence ventilu
+                  </div>
+                  <div className="text-2xl font-black font-mono text-black dark:text-amber-400">
+                    {cadenceDisplay}× / den
+                  </div>
+                  <p className="text-[10px] font-bold text-black dark:text-white leading-snug">
+                    {cadenceTitle}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Stat 3 - Vertikální dostřel */}
             <div className="bg-white dark:bg-[#111827] border border-black dark:border-slate-800 rounded-2xl p-4 space-y-1 shadow-sm text-black dark:text-white">
@@ -343,18 +372,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </span>
               </div>
               {pissedCountries.length > 0 ? (
-                <div className="flex items-center gap-1.5 pt-1.5 overflow-x-auto custom-scroll pb-0.5">
+                <div className="flex items-center gap-1.5 pt-1.5 overflow-x-auto custom-scroll pb-0.5 flex-wrap">
                   {pissedCountries.map((c) => (
-                    <div 
+                    <span 
                       key={c.code} 
-                      title={c.name} 
-                      className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-black/20 dark:border-slate-700 shadow-2xs hover:scale-105 transition transform cursor-pointer flex-shrink-0"
+                      title={c.name}
+                      className="hover:scale-110 transition transform cursor-pointer"
                     >
                       <CountryFlag code={c.code} name={c.name} size="md" />
-                      <span className="text-[11px] font-black text-black dark:text-white leading-none">
-                        {c.name}
-                      </span>
-                    </div>
+                    </span>
                   ))}
                 </div>
               ) : (
