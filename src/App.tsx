@@ -370,7 +370,7 @@ export function App() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden flex flex-col bg-[var(--bg-gradient)] text-[var(--text-main)] antialiased font-sans">
+    <div className="w-screen h-dvh overflow-hidden flex flex-col bg-[var(--bg-gradient)] text-[var(--text-main)] antialiased font-sans">
       
       {/* Dynamic Screen View */}
       <main className="flex-1 relative w-full h-full overflow-hidden">
