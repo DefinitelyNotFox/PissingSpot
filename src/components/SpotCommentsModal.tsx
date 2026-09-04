@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Spot, SpotComment } from '../types/spot';
-import { X, MessageSquare, Send, Sparkles } from 'lucide-react';
+import { X, MessageSquare, Send } from 'lucide-react';
 import { UrineRating, UrineDrop } from './UrineDrop';
 import { soundFx } from '../utils/audio';
 
@@ -14,14 +14,6 @@ interface SpotCommentsModalProps {
     avatar: string;
   };
 }
-
-const RATING_DESCRIPTIONS: Record<number, string> = {
-  1: '1/5 • Nouzovka / Horší odraz 😬',
-  2: '2/5 • Průměr / Nic moc 😐',
-  3: '3/5 • Dobrý standard 💧',
-  4: '4/5 • Skvělý proud & krytí 🎯',
-  5: '5/5 • Božský spot & Legenda! 👑'
-};
 
 const DEFAULT_COMMENTS_BY_CATEGORY: Record<string, SpotComment[]> = {
   view: [

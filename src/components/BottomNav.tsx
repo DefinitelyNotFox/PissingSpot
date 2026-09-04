@@ -11,8 +11,7 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
-  onSelectTab,
-  hasUnreadFeed = true
+  onSelectTab
 }) => {
   return (
     <nav className="h-16 pb-[env(safe-area-inset-bottom,0px)] bg-[var(--bg-app)] border-t border-black dark:border-slate-800 px-6 sm:px-12 flex items-center justify-around z-40 relative transition-colors duration-200">
